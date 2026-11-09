@@ -5,29 +5,26 @@ from monster import Monster
 from abilities import Shooter, Shielded
 
 
-class NormalMonster(Monster, Shooter):
+class NormalMonster(Monster):
     def __init__(self, x, y):
-        Monster.__init__(self, x, y, max_health=3)
-        self.setup_shooter(interval=150)
+        super().__init__(x, y, max_health=3)
 
 
-class FastMonster(Monster, Shooter):
+class FastMonster(Monster):
     def __init__(self, x, y):
-        Monster.__init__(self, x, y, width=40, height=40, max_health=2,
+        super().__init__(x, y, width=40, height=40, max_health=2,
                          speed_x=6, speed_y=4, color=(255, 140, 0))
-        self.setup_shooter(interval=120)
 
 
-class StrongMonster(Monster, Shooter):
+class StrongMonster(Monster):
     def __init__(self, x, y):
-        Monster.__init__(self, x, y, width=70, height=70, max_health=8,
+        super().__init__(x, y, width=70, height=70, max_health=8,
                          speed_x=1, speed_y=1, color=(150, 30, 30),
                          damage_multipliers={"bullet": 0.5})
-        self.setup_shooter(interval=180)
 
 
 class FlyingMonster(Monster):
-    """Vole en ligne ondulée, rebondit uniquement sur les côtés. Ne tire pas."""
+    """Vole en ligne ondulée, rebondit uniquement sur les côtés."""
 
     def __init__(self, x, y):
         super().__init__(x, y, width=45, height=30, max_health=3,
@@ -36,7 +33,7 @@ class FlyingMonster(Monster):
         self.base_y = y
         self._angle = 0.0
 
-    def move(self, width, height, target=None):
+    def move(self, width, height):
         self.rect.x += self.speed_x
         if self.rect.left <= 0 or self.rect.right >= width:
             self.speed_x = -self.speed_x
@@ -45,14 +42,14 @@ class FlyingMonster(Monster):
 
 
 class ImmobileMonster(Monster):
-    """Ne bouge jamais, mais respecte le contrat de move() (LSP). Ne tire pas."""
+    """Ne bouge jamais, mais respecte le contrat de move() (LSP)."""
 
     def __init__(self, x, y):
         super().__init__(x, y, width=55, height=55, max_health=5,
                          speed_x=0, speed_y=0, color=(90, 90, 90),
                          damage_multipliers={"laser": 0.5})
 
-    def move(self, width, height, target=None):
+    def move(self, width, height):
         pass
 
 
@@ -62,35 +59,10 @@ class ShooterMonster(Monster, Shooter):
         self.setup_shooter(interval=120)
 
 
-class ShieldedMonster(Shielded, Monster, Shooter):
+class ShieldedMonster(Shielded, Monster):
     def __init__(self, x, y):
         Monster.__init__(self, x, y, max_health=3, color=(60, 200, 200))
         self.setup_shield(shield=3)
-        self.setup_shooter(interval=120)
-
-
-class ChasingMonster(Monster, Shooter):
-    """Monstre rose qui poursuit le joueur en ligne droite et lui tire dessus."""
-
-    def __init__(self, x, y):
-        Monster.__init__(self, x, y, width=45, height=45, max_health=3,
-                         speed_x=2, speed_y=2, color=(255, 80, 180))
-        self.setup_shooter(interval=90)
-
-    def move(self, width, height, target=None):
-        if target is None:
-            super().move(width, height)
-            return
-
-        if self.rect.centerx < target.rect.centerx:
-            self.rect.x += self.speed_x
-        elif self.rect.centerx > target.rect.centerx:
-            self.rect.x -= self.speed_x
-
-        if self.rect.centery < target.rect.centery:
-            self.rect.y += self.speed_y
-        elif self.rect.centery > target.rect.centery:
-            self.rect.y -= self.speed_y
 
 
 MONSTER_TYPES = [
@@ -101,7 +73,6 @@ MONSTER_TYPES = [
     ImmobileMonster,
     ShooterMonster,
     ShieldedMonster,
-    ChasingMonster,
 ]
 
 

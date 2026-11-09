@@ -1,22 +1,12 @@
+
 import pygame
 
 
 class Player:
-    MAX_HEALTH = 3
-
     def __init__(self):
         self.rect = pygame.Rect(380, 520, 40, 40)
         self.speed = 5
         self.color = (50, 150, 255)
-        self.max_health = self.MAX_HEALTH
-        self.health = self.max_health
-
-    @property
-    def is_alive(self):
-        return self.health > 0
-
-    def take_damage(self, amount):
-        self.health = max(0, self.health - amount)
 
     def move(self, keys, game_area):
         if keys[pygame.K_LEFT]:
