@@ -34,7 +34,7 @@ class Monster:
     def _apply_damage(self, amount):
         self.health = max(0, self.health - amount)
 
-    def move(self, width, height):
+    def move(self, width, height, target=None):
         self.rect.x += self.speed_x
         self.rect.y += self.speed_y
 
