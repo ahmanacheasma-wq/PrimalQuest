@@ -5,6 +5,7 @@ from abilities import Shooter
 from health_bar import HealthBar
 from bullet import Bullet
 from view import View
+from controller import Controller
 
 
 class GameBoard:
@@ -21,6 +22,7 @@ class GameBoard:
         self.game_area = self.screen.get_rect()
 
         self.view = View(self.screen, self.width, self.height)
+        self.controller = Controller(self, self.view)
         self.health_bar = HealthBar()
         self.weapons = ["bullet", "laser"]
 
@@ -44,32 +46,31 @@ class GameBoard:
     def game_over(self):
         return not self.player.is_alive
 
-    def handle_events(self):
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                self.running = False
+    # ----- Actions demandées par le Controller -----
 
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    self.running = False
+    def stop(self):
+        self.running = False
 
-                if event.key == pygame.K_TAB and not self.game_over:
-                    self.weapon_index = (self.weapon_index + 1) % len(self.weapons)
+    def next_weapon(self):
+        if not self.game_over:
+            self.weapon_index = (self.weapon_index + 1) % len(self.weapons)
 
-                if event.key == pygame.K_SPACE and not self.game_over:
-                    self.bullets.append(Bullet(
-                        self.player.rect.centerx,
-                        self.player.rect.top,
-                        kind=self.weapon,
-                        direction=-1,
-                    ))
+    def fire(self):
+        if not self.game_over:
+            self.bullets.append(Bullet(
+                self.player.rect.centerx,
+                self.player.rect.top,
+                kind=self.weapon,
+                direction=-1,
+            ))
 
-            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                if self.game_over and self.view.button_rect.collidepoint(event.pos):
-                    self.reset()
+    def restart(self):
+        if self.game_over:
+            self.reset()
 
-    def update(self):
-        keys = pygame.key.get_pressed()
+    # ----- Logique du jeu (Model) -----
+
+    def update(self, keys):
         self.player.move(keys, self.game_area)
         self._update_monsters()
         self._update_player_bullets()
@@ -115,17 +116,18 @@ class GameBoard:
             elif bullet.is_off_screen():
                 self.enemy_bullets.remove(bullet)
 
-    def draw(self):
-        self.screen.fill((25, 25, 40))
+    # ----- Affichage (délégué à la View) -----
 
-        self.player.draw(self.screen)
+    def draw(self):
+        self.view.draw_background()
+
+        self.view.draw_player(self.player)
 
         for monster in self.monsters:
-            monster.draw(self.screen)
-            self.health_bar.draw(self.screen, monster)
+            self.view.draw_monster(monster, self.health_bar)
 
         for bullet in self.bullets + self.enemy_bullets:
-            bullet.draw(self.screen)
+            self.view.draw_bullet(bullet)
 
         self.view.draw_info_panel(self.score, self.player.health)
 
@@ -134,11 +136,13 @@ class GameBoard:
 
         pygame.display.flip()
 
+    # ----- Boucle principale -----
+
     def run(self):
         while self.running:
-            self.handle_events()
+            self.controller.process_events()
             if not self.game_over:
-                self.update()
+                self.update(self.controller.pressed_keys())
             self.draw()
             self.clock.tick(60)
 
