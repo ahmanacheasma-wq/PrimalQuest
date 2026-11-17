@@ -1,20 +1,40 @@
-
-import pygame
 import random
+import pygame
+from damage import MultiplierDamageCalculator
 
 
 class Monster:
-    def __init__(self):
-        self.rect = pygame.Rect(300, 100, 50, 50)
-        self.speed_x = 3
-        self.speed_y = 2
-        self.color = (230, 60, 60)
+    """
+    Monstre de base : gère sa vie, ses déplacements et son corps.
+    N'affiche pas sa barre de vie (SRP) et ne connaît pas le type d'arme (DIP).
+    """
 
+    def __init__(self, x, y, width=50, height=50, max_health=3,
+                 speed_x=3, speed_y=2, color=(230, 60, 60),
+                 damage_multipliers=None, damage_calculator=None):
+        self.rect = pygame.Rect(x, y, width, height)
+        self.max_health = max_health
+        self.health = max_health
+        self.speed_x = speed_x
+        self.speed_y = speed_y
+        self.color = color
+        self.damage_multipliers = damage_multipliers or {}
+        self.damage_calculator = damage_calculator or MultiplierDamageCalculator()
 
-        self.max_health = 100
-        self.health = self.max_health
+    @property
+    def is_alive(self):
+        return self.health > 0
 
-    def move(self, width, height):
+    def take_damage(self, attack):
+        amount = self.damage_calculator.compute(attack, self)
+        if amount > 0:
+            self._apply_damage(amount)
+        return amount
+
+    def _apply_damage(self, amount):
+        self.health = max(0, self.health - amount)
+
+    def move(self, width, height, target=None):
         self.rect.x += self.speed_x
         self.rect.y += self.speed_y
 
@@ -27,38 +47,6 @@ class Monster:
     def reset_position(self, width, height):
         self.rect.x = random.randint(0, width - self.rect.width)
         self.rect.y = random.randint(50, 300)
-        self.health = self.max_health
-
-    
-    def take_damage(self, damage):
-        self.health -= damage
-
-        if self.health < 0:
-            self.health = 0
-    
 
     def draw(self, screen):
         pygame.draw.rect(screen, self.color, self.rect)
-
-class HealthBar:
-    def __init__(self, monster):
-        self.monster = monster
-        self.width = 50
-        self.height = 6
-
-    def draw(self, screen):
-        x = self.monster.rect.x
-        y = self.monster.rect.y - 10
-
-        background = pygame.Rect(
-            x, y, self.width, self.height
-        )
-        pygame.draw.rect(screen, (200, 0, 0), background)
-
-        ratio = self.monster.health / self.monster.max_health
-        current_width = int(self.width * ratio)
-
-        health_rect = pygame.Rect(
-            x, y, current_width, self.height
-        )
-        pygame.draw.rect(screen, (0, 200, 0), health_rect)
