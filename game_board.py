@@ -4,6 +4,7 @@ from monster_types import create_random_monster
 from abilities import Shooter
 from health_bar import HealthBar
 from bullet import Bullet
+from view import View
 
 
 class GameBoard:
@@ -19,14 +20,9 @@ class GameBoard:
         self.clock = pygame.time.Clock()
         self.game_area = self.screen.get_rect()
 
+        self.view = View(self.screen, self.width, self.height)
         self.health_bar = HealthBar()
         self.weapons = ["bullet", "laser"]
-
-        self.font = pygame.font.Font(None, 36)
-        self.big_font = pygame.font.Font(None, 90)
-        self.button_font = pygame.font.Font(None, 42)
-        self.button_rect = pygame.Rect(0, 0, 260, 60)
-        self.button_rect.center = (self.width // 2, self.height // 2 + 60)
 
         self.running = True
         self.reset()
@@ -69,7 +65,7 @@ class GameBoard:
                     ))
 
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                if self.game_over and self.button_rect.collidepoint(event.pos):
+                if self.game_over and self.view.button_rect.collidepoint(event.pos):
                     self.reset()
 
     def update(self):
@@ -131,30 +127,12 @@ class GameBoard:
         for bullet in self.bullets + self.enemy_bullets:
             bullet.draw(self.screen)
 
-        self._draw_hud()
+        self.view.draw_info_panel(self.score, self.player.health)
 
         if self.game_over:
-            self._draw_game_over()
+            self.view.draw_game_over()
 
         pygame.display.flip()
-
-    def _draw_hud(self):
-        score_text = self.font.render(f"Score : {self.score}", True, (255, 255, 255))
-        health_text = self.font.render(f"Vie : {self.player.health}", True, (255, 255, 255))
-        self.screen.blit(score_text, (10, 10))
-        self.screen.blit(health_text, (10, 40))
-
-    def _draw_game_over(self):
-        overlay = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
-        overlay.fill((0, 0, 0, 180))
-        self.screen.blit(overlay, (0, 0))
-
-        title = self.big_font.render("GAME OVER", True, (255, 80, 80))
-        self.screen.blit(title, title.get_rect(center=(self.width // 2, self.height // 2 - 40)))
-
-        pygame.draw.rect(self.screen, (60, 160, 60), self.button_rect, border_radius=10)
-        label = self.button_font.render("Rejouer", True, (255, 255, 255))
-        self.screen.blit(label, label.get_rect(center=self.button_rect.center))
 
     def run(self):
         while self.running:
