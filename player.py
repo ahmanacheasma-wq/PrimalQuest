@@ -3,9 +3,10 @@ import pygame
 
 class Player:
     MAX_HEALTH = 3
+    SIZE = 90
 
     def __init__(self):
-        self.rect = pygame.Rect(380, 520, 40, 40)
+        self.rect = pygame.Rect(360, 410, self.SIZE, self.SIZE)
         self.speed = 5
         self.color = (50, 150, 255)
         self.max_health = self.MAX_HEALTH

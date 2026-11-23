@@ -21,17 +21,22 @@ class View:
         self.button_rect.center = (width // 2, height // 2 + 60)
 
     def draw_background(self):
-        background = self.assets.image("fonds/fond.png", (self.width, self.height))
-        if background is not None:
-            self.screen.blit(background, (0, 0))
-        else:
-            self.screen.fill(self.BACKGROUND_COLOR)
-
-    def draw_info_panel(self, score, health):
+        for name in ("fonds/fond.png", "fonds/fond.jpg", "fonds/fond.png.jpg"):
+            background = self.assets.image(name, (self.width, self.height))
+            if background is not None:
+                self.screen.blit(background, (0, 0))
+                return
+        self.screen.fill(self.BACKGROUND_COLOR)
+        
+    def draw_info_panel(self, score, health, game_over=False):
         score_text = self.font.render(f"Score : {score}", True, self.WHITE)
         health_text = self.font.render(f"Vie : {health}", True, self.WHITE)
+        status = "GAME OVER" if game_over else "En cours"
+        status_color = self.RED if game_over else (120, 230, 120)
+        status_text = self.font.render(f"Statut : {status}", True, status_color)
         self.screen.blit(score_text, (10, 10))
         self.screen.blit(health_text, (10, 40))
+        self.screen.blit(status_text, (10, 70))
 
     def draw_game_over(self):
         overlay = pygame.Surface((self.width, self.height), pygame.SRCALPHA)

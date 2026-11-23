@@ -34,19 +34,22 @@ class Monster:
     def _apply_damage(self, amount):
         self.health = max(0, self.health - amount)
 
-    def move(self, width, height, target=None):
+    def move(self, area, target=None):
+        """Rebondit sur les bords de la zone de jeu (area) et y reste."""
         self.rect.x += self.speed_x
         self.rect.y += self.speed_y
 
-        if self.rect.left <= 0 or self.rect.right >= width:
+        if self.rect.left <= area.left or self.rect.right >= area.right:
             self.speed_x = -self.speed_x
 
-        if self.rect.top <= 0 or self.rect.bottom >= height:
+        if self.rect.top <= area.top or self.rect.bottom >= area.bottom:
             self.speed_y = -self.speed_y
 
-    def reset_position(self, width, height):
-        self.rect.x = random.randint(0, width - self.rect.width)
-        self.rect.y = random.randint(50, 300)
+        self.rect.clamp_ip(area)
+
+    def reset_position(self, area):
+        self.rect.x = random.randint(area.left, area.right - self.rect.width)
+        self.rect.y = random.randint(area.top, area.bottom - self.rect.height)
 
     def draw(self, screen):
         pygame.draw.rect(screen, self.color, self.rect)

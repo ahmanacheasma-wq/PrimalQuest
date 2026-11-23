@@ -53,7 +53,7 @@ class GameBoard:
         for bullet in m.bullets + m.enemy_bullets:
             self.view.draw_bullet(bullet)
 
-        self.view.draw_info_panel(m.score, m.player.health)
+            self.view.draw_info_panel(m.score, m.player.health, m.game_over)
 
         if m.game_over:
             self.view.draw_game_over()
