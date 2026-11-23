@@ -4,6 +4,9 @@ from monster_types import create_random_monster
 from abilities import Shooter
 from bullet import Bullet
 
+# Zone du sol de l'image de fond : joueur et monstres restent dedans
+PLAY_AREA = pygame.Rect(90, 260, 630, 240)
+
 
 class GameModel:
     """Règles du jeu. Ne dessine rien et ne lit aucune touche (MVC)."""
@@ -11,14 +14,14 @@ class GameModel:
     def __init__(self, width, height):
         self.width = width
         self.height = height
-        self.game_area = pygame.Rect(0, 0, width, height)
+        self.game_area = PLAY_AREA
         self.weapons = ["bullet", "laser"]
         self.reset()
 
     def reset(self):
         """Remet la partie à zéro."""
         self.player = Player()
-        self.monsters = [create_random_monster(self.width, self.height) for _ in range(2)]
+        self.monsters = [create_random_monster(self.game_area) for _ in range(2)]
         self.bullets = []          # tirs du joueur
         self.enemy_bullets = []    # tirs des monstres
         self.weapon_index = 0
@@ -63,7 +66,7 @@ class GameModel:
 
     def _update_monsters(self):
         for monster in self.monsters:
-            monster.move(self.width, self.height, self.player)
+            monster.move(self.game_area, self.player)
             if isinstance(monster, Shooter):
                 shot = monster.try_shoot(self.player)
                 if shot is not None:
@@ -90,7 +93,7 @@ class GameModel:
 
     def _replace_monster(self, dead):
         self.monsters.remove(dead)
-        self.monsters.append(create_random_monster(self.width, self.height))
+        self.monsters.append(create_random_monster(self.game_area))
 
     def _update_enemy_bullets(self):
         for bullet in list(self.enemy_bullets):
